@@ -1,24 +1,16 @@
 package com.example.william.formsender;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONException;
@@ -34,17 +26,38 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class FormActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    EditText nameTextField;
-    EditText priceTextField;
-    Spinner catSpinner;
-    ImageView mapImageView;
+/**
+ * Copyright 2014 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-    Number lat;
-    Number lng;
+/**
+ * Location sample.
+ *
+ * Demonstrates use of the Location API to retrieve the last known location for a device.
+ * This sample uses Google Play services (GoogleApiClient) but does not need to authenticate a user.
+ * See https://github.com/googlesamples/android-google-accounts/tree/master/QuickStart if you are
+ * also using APIs that need authentication.
+ */
+public class LocationActivity extends AppCompatActivity implements
+        ConnectionCallbacks, OnConnectionFailedListener {
+
+    public static final MediaType MEDIA_TYPE_JSON
+            = MediaType.parse("application/json; charset=utf-8");
+
+    protected static final String TAG = "MainActivity";
 
     /**
      * Provides the entry point to Google Play services.
@@ -56,44 +69,22 @@ public class FormActivity extends AppCompatActivity
      */
     protected Location mLastLocation;
 
-
     protected String mLatitudeLabel;
     protected String mLongitudeLabel;
     protected TextView mLatitudeText;
     protected TextView mLongitudeText;
 
-    Button sendButton;
 
-    public static final MediaType MEDIA_TYPE_JSON
-            = MediaType.parse("application/json; charset=utf-8");
-
-
-    public static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.form);
-
+        setContentView(R.layout.activity_location);
 
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
         mLongitudeLabel = getResources().getString(R.string.longitude_label);
         mLatitudeText = (TextView) findViewById((R.id.latitude_text));
         mLongitudeText = (TextView) findViewById((R.id.longitude_text));
-
-        nameTextField = (EditText) findViewById(R.id.nameTextField);
-        priceTextField = (EditText) findViewById(R.id.priceTextField);
-        catSpinner = (Spinner) findViewById(R.id.catSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.category_array, android.R.layout.simple_spinner_item);
-
-        // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // Apply the adapter to the spinner
-        catSpinner.setAdapter(adapter);
-
-        sendButton = (Button) findViewById(R.id.sendButton);
 
         buildGoogleApiClient();
     }
@@ -138,10 +129,41 @@ public class FormActivity extends AppCompatActivity
             String address = "http://localhost:3000/";
             String locationString = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
 
-            lat = mLastLocation.getLatitude();
-            lng = mLastLocation.getLongitude();
+            JSONObject jsonForm = new JSONObject();
+
+            try {
+                jsonForm.put("location", locationString);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             Log.v(TAG, locationString);
+
+            OkHttpClient client = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url(address)
+                    .post(RequestBody.create(MEDIA_TYPE_JSON, jsonForm.toString()))
+                    .build();
+
+            Call call = client.newCall(request);
+
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        Log.v(TAG, response.body().string());
+                    }
+                    else {
+                        Log.i(TAG, "There was an error");
+                    }
+                }
+            });
 
             mLatitudeText.setText(String.format("%s: %f", mLatitudeLabel,
                     mLastLocation.getLatitude()));
@@ -166,52 +188,5 @@ public class FormActivity extends AppCompatActivity
         // attempt to re-establish the connection.
         Log.i(TAG, "Connection suspended");
         mGoogleApiClient.connect();
-    }
-
-    public void send(View v) {
-        Log.v(TAG, "Send button clicked");
-        String sendURL = "http://localhost:3000/";
-
-        String name = nameTextField.getText().toString();
-        String price = priceTextField.getText().toString();
-        String cat = catSpinner.getSelectedItem().toString();
-
-        JSONObject jsonForm = new JSONObject();
-
-        try {
-            jsonForm.put("name", name);
-            jsonForm.put("price", price);
-            jsonForm.put("category", cat);
-            jsonForm.put("lat",lat);
-            jsonForm.put("lng",lng);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .url(sendURL)
-                .post(RequestBody.create(MEDIA_TYPE_JSON, jsonForm.toString()))
-                .build();
-
-        Call call = client.newCall(request);
-
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    Log.v(TAG, response.body().string());
-                } else {
-                    Log.i(TAG, "There was an error");
-                }
-            }
-        });
-
     }
 }

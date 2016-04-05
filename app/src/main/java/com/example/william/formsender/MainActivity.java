@@ -50,11 +50,25 @@ public class MainActivity extends AppCompatActivity {
                 openForm();
             }
         });
+
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMap();
+            }
+        });
+    }
+
+    private void openMap() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     private void openForm() {
         Intent intent = new Intent(this, FormActivity.class);
         startActivity(intent);
     }
+
+
 
 }
