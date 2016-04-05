@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FormSender</string>
+
+    <string-array name="category_array">
+        <item>Tortas</item>
+        <item>Comida Corrida</item>
+        <item>Tacos de Guisado</item>
+        <item>France</item>
+    </string-array>
+    <string name="title_activity_maps">Map</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:text="Message"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <EditText
+        android:id="@+id/nameTextField"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Place Name"
+        />
+
+    <EditText
+        android:id="@+id/priceTextField"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Price Range"
+        />
+
+    <Spinner
+        android:id="@+id/catSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/category_array"
+        />
+
+    <Button
+        android:text="Send"
+        android:id="@+id/sendButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="send"
+        />
+
+</LinearLayout>
