@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,13 +28,24 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
+    public static final String TAG = MapsActivity.class.getSimpleName();
+
     private boolean mPermissionDenied = false;
     private boolean buttonClicked;
+
+    public String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("userId")) {
+            userId = intent.getStringExtra("userId");
+            Log.v(TAG, userId);
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -111,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements
         Intent intent = new Intent(this,FormActivity.class);
         intent.putExtra("clickedLat",lat);
         intent.putExtra("clickedLng",lng);
+        intent.putExtra("userId",userId);
         startActivity(intent);
     }
 

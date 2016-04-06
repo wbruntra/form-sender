@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -31,8 +32,11 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    TextView mMainTitle;
     Button mapButton;
     Button formButton;
+    Button signinButton;
+    String userId;
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -43,6 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
         mapButton = (Button) findViewById(R.id.mapButton);
         formButton = (Button) findViewById(R.id.formButton);
+        signinButton = (Button) findViewById(R.id.signinButton);
+        mMainTitle = (TextView) findViewById(R.id.mainTitleTextView);
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("userId")) {
+            userId = intent.getStringExtra("userId");
+            Log.v(TAG, userId);
+        }
+
 
         formButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,10 +70,19 @@ public class MainActivity extends AppCompatActivity {
                 openMap();
             }
         });
+
+        signinButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                openSignin();
+            }
+        });
     }
 
     private void openMap() {
         Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("userId",userId);
         startActivity(intent);
     }
 
@@ -69,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
+    private void openSignin() {
+        Intent intent = new Intent(this, SignInActivity.class);
+        startActivity(intent);
+    }
 
 }

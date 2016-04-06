@@ -65,12 +65,13 @@ public class FormActivity extends AppCompatActivity
     protected TextView mLongitudeText;
 
     Button sendButton;
+    String userId;
 
     public static final MediaType MEDIA_TYPE_JSON
             = MediaType.parse("application/json; charset=utf-8");
 
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = FormActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,7 @@ public class FormActivity extends AppCompatActivity
         Intent intent = getIntent();
         lat = intent.getDoubleExtra("clickedLat", 19);
         lng = intent.getDoubleExtra("clickedLng", -99);
+        userId = intent.getStringExtra("userId");
 
         Log.v(TAG, "Clicked from "+lat+","+lng);
 
@@ -177,7 +179,7 @@ public class FormActivity extends AppCompatActivity
 
     public void send(View v) {
         Log.v(TAG, "Send button clicked");
-        String sendURL = "http://localhost:3000/";
+        String sendURL = "http://localhost:3000/locations/android";
 
         String name = nameTextField.getText().toString();
         String price = priceTextField.getText().toString();
@@ -191,6 +193,7 @@ public class FormActivity extends AppCompatActivity
             jsonForm.put("category", cat);
             jsonForm.put("lat",lat);
             jsonForm.put("lng",lng);
+            jsonForm.put("creatorId",userId);
         } catch (JSONException e) {
             e.printStackTrace();
         }

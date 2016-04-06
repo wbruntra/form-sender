@@ -1,0 +1,60 @@
+{
+  "project_info": {
+    "project_id": "rot13-wrb",
+    "project_number": "1076675077133",
+    "name": "rot13-wrb"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076675077133:android:daaa73ee4a9e19db",
+        "client_id": "android:com.example.william.formsender",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.example.william.formsender",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1076675077133-cgifguv4giuv76gb72jhuimtglgvkief.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.william.formsender",
+            "certificate_hash": "94F4517D3E2137F0E6930BCFBF910574CDFD1AA8"
+          }
+        },
+        {
+          "client_id": "1076675077133-qfuntqaqd96f4c1hl7c2ha5dnq2ls63b.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "1076675077133-ib8694vi1gk2b35nliorhf8gie2gsf0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

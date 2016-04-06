@@ -14,8 +14,8 @@
         android:layout_height="wrap_content"
         android:text="Open Form"
         android:id="@+id/formButton"
-        android:layout_alignParentTop="true"
-        android:layout_alignEnd="@+id/mapButton" />
+        android:layout_below="@+id/mainTitleTextView"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -24,4 +24,22 @@
         android:id="@+id/mapButton"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Signin"
+        android:id="@+id/signinButton"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Hello"
+        android:id="@+id/mainTitleTextView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
