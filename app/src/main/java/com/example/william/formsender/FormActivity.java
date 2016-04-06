@@ -1,6 +1,7 @@
 package com.example.william.formsender;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,8 +45,8 @@ public class FormActivity extends AppCompatActivity
     Spinner catSpinner;
     ImageView mapImageView;
 
-    Number lat;
-    Number lng;
+    Double lat;
+    Double lng;
 
     /**
      * Provides the entry point to Google Play services.
@@ -75,6 +77,11 @@ public class FormActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form);
 
+        Intent intent = getIntent();
+        lat = intent.getDoubleExtra("clickedLat", 19);
+        lng = intent.getDoubleExtra("clickedLng", -99);
+
+        Log.v(TAG, "Clicked from "+lat+","+lng);
 
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
         mLongitudeLabel = getResources().getString(R.string.longitude_label);
@@ -138,8 +145,8 @@ public class FormActivity extends AppCompatActivity
             String address = "http://localhost:3000/";
             String locationString = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
 
-            lat = mLastLocation.getLatitude();
-            lng = mLastLocation.getLongitude();
+//            lat = mLastLocation.getLatitude();
+//            lng = mLastLocation.getLongitude();
 
             Log.v(TAG, locationString);
 

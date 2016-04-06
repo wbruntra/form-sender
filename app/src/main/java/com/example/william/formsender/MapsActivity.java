@@ -1,6 +1,7 @@
 package com.example.william.formsender;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -13,11 +14,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMapLongClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -25,6 +28,7 @@ public class MapsActivity extends FragmentActivity implements
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private boolean mPermissionDenied = false;
+    private boolean buttonClicked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +53,28 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        buttonClicked = false;
 
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMapLongClickListener(this);
         enableMyLocation();
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng cdmx = new LatLng(19.41, -99.16);
+        float zoomLevel = (float) 13.0;
+        mMap.addMarker(new MarkerOptions().position(cdmx).title("Marker in Mexico"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cdmx, zoomLevel));
+
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                // (the camera animates to the user's current position).
+                float zoomLevel = (float) 17.0;
+                if (buttonClicked) {
+                    mMap.moveCamera(CameraUpdateFactory.zoomTo(zoomLevel));
+                    buttonClicked = false;
+                }
+            }
+        });
     }
 
     /**
@@ -79,7 +97,21 @@ public class MapsActivity extends FragmentActivity implements
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
+        float zoomLevel = (float) 15.0;
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(zoomLevel));
+        buttonClicked = true;
         return false;
+    }
+
+    @Override
+    public void onMapLongClick(LatLng point) {
+        Double lat = point.latitude;
+        Double lng = point.longitude;
+
+        Intent intent = new Intent(this,FormActivity.class);
+        intent.putExtra("clickedLat",lat);
+        intent.putExtra("clickedLng",lng);
+        startActivity(intent);
     }
 
     @Override
