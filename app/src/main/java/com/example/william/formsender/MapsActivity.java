@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -61,7 +62,6 @@ public class MapsActivity extends FragmentActivity implements
             userId = "none";
         }
 
-        retrieveLocations();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -89,10 +89,11 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    Log.v(TAG, response.body().string());
+                    String jsonString = response.body().string();
                     try {
-                        recentLocations = new JSONArray(response.body().string());
-                        populateMap();
+                        JSONArray entries = new JSONArray(jsonString);
+                        recentLocations = entries;
+                        populateMap(recentLocations);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -103,8 +104,20 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    private void populateMap() {
-        Log.v(TAG, recentLocations.toString());
+    private void populateMap(JSONArray entries) throws JSONException {
+        for(int n=0;n< entries.length(); n++) {
+            JSONObject entry = entries.getJSONObject(n);
+            Double lat = entry.getDouble("lat");
+            Double lng = entry.getDouble("lng");
+            final String placeName = entry.getString("name");
+            final LatLng placeGPS = new LatLng(lat, lng);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mMap.addMarker(new MarkerOptions().position(placeGPS).title(placeName));
+                }
+            });
+        }
     }
 
 
@@ -125,6 +138,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapLongClickListener(this);
         enableMyLocation();
+        retrieveLocations();
 
         LatLng cdmx = new LatLng(19.41, -99.16);
         float zoomLevel = (float) 13.0;
