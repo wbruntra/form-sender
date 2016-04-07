@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -30,6 +31,9 @@ public class SignInActivity extends AppCompatActivity implements
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
 
+    Button mMapOpenButton;
+    String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +46,13 @@ public class SignInActivity extends AppCompatActivity implements
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
+        mMapOpenButton = (Button) findViewById(R.id.mapOpenButton);
+        mMapOpenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMap();
+            }
+        });
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -72,6 +83,12 @@ public class SignInActivity extends AppCompatActivity implements
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
         // [END customize_button]
+    }
+
+    private void openMap() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("userId",userId);
+        startActivity(intent);
     }
 
     @Override
@@ -120,11 +137,12 @@ public class SignInActivity extends AppCompatActivity implements
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "Account Info:"+acct.getId());
+            userId = acct.getId();
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             updateUI(true);
-            backToMain(acct.getId());
         } else {
             // Signed out, show unauthenticated UI.
+            userId = "none";
             updateUI(false);
         }
     }
@@ -149,6 +167,7 @@ public class SignInActivity extends AppCompatActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
+                        userId = "none";
                         // [START_EXCLUDE]
                         updateUI(false);
                         // [END_EXCLUDE]

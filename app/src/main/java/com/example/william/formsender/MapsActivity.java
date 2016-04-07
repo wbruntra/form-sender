@@ -19,6 +19,18 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapLongClickListener,
@@ -34,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements
     private boolean buttonClicked;
 
     public String userId;
+    public JSONArray recentLocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +57,54 @@ public class MapsActivity extends FragmentActivity implements
         if(intent.hasExtra("userId")) {
             userId = intent.getStringExtra("userId");
             Log.v(TAG, userId);
+        } else {
+            userId = "none";
         }
+
+        retrieveLocations();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    private void retrieveLocations() {
+        String whatsGoodURL = "http://localhost:3000/locations/json";
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(whatsGoodURL)
+                .build();
+
+        Call call = client.newCall(request);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "Call failed!");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Log.v(TAG, response.body().string());
+                    try {
+                        recentLocations = new JSONArray(response.body().string());
+                        populateMap();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.i(TAG, "There was an error");
+                }
+            }
+        });
+    }
+
+    private void populateMap() {
+        Log.v(TAG, recentLocations.toString());
     }
 
 
@@ -73,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements
 
         LatLng cdmx = new LatLng(19.41, -99.16);
         float zoomLevel = (float) 13.0;
-        mMap.addMarker(new MarkerOptions().position(cdmx).title("Marker in Mexico"));
+//        mMap.addMarker(new MarkerOptions().position(cdmx).title("Marker in Mexico"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cdmx, zoomLevel));
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
@@ -120,11 +175,15 @@ public class MapsActivity extends FragmentActivity implements
         Double lat = point.latitude;
         Double lng = point.longitude;
 
-        Intent intent = new Intent(this,FormActivity.class);
-        intent.putExtra("clickedLat",lat);
-        intent.putExtra("clickedLng",lng);
-        intent.putExtra("userId",userId);
-        startActivity(intent);
+        if (!Objects.equals(userId, "none")) {
+            Intent intent = new Intent(this, FormActivity.class);
+            intent.putExtra("clickedLat", lat);
+            intent.putExtra("clickedLng", lng);
+            intent.putExtra("userId", userId);
+            startActivity(intent);
+        } else {
+            Log.v(TAG,"Click from anonymous user");
+        }
     }
 
     @Override

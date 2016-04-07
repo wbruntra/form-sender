@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,7 +51,7 @@
         <activity android:name=".TitleActivity" />
         <activity android:name=".FormActivity" />
         <activity android:name=".LocationActivity" />
-        <activity android:name=".SignInActivity"></activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>
