@@ -59,13 +59,15 @@ public class FormActivity extends AppCompatActivity
     protected Location mLastLocation;
 
 
-    protected String mLatitudeLabel;
-    protected String mLongitudeLabel;
-    protected TextView mLatitudeText;
-    protected TextView mLongitudeText;
+//    protected String mLatitudeLabel;
+//    protected String mLongitudeLabel;
+//    protected TextView mLatitudeText;
+//    protected TextView mLongitudeText;
 
     Button sendButton;
     String userId;
+
+    User mUser;
 
     public static final MediaType MEDIA_TYPE_JSON
             = MediaType.parse("application/json; charset=utf-8");
@@ -78,17 +80,19 @@ public class FormActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form);
 
+        mUser = (User) getApplicationContext();
+
         Intent intent = getIntent();
         lat = intent.getDoubleExtra("clickedLat", 19);
         lng = intent.getDoubleExtra("clickedLng", -99);
-        userId = intent.getStringExtra("userId");
+        userId = mUser.getUserId();
 
         Log.v(TAG, "Clicked from "+lat+","+lng);
 
-        mLatitudeLabel = getResources().getString(R.string.latitude_label);
-        mLongitudeLabel = getResources().getString(R.string.longitude_label);
-        mLatitudeText = (TextView) findViewById((R.id.latitude_text));
-        mLongitudeText = (TextView) findViewById((R.id.longitude_text));
+//        mLatitudeLabel = getResources().getString(R.string.latitude_label);
+//        mLongitudeLabel = getResources().getString(R.string.longitude_label);
+//        mLatitudeText = (TextView) findViewById((R.id.latitude_text));
+//        mLongitudeText = (TextView) findViewById((R.id.longitude_text));
 
         nameTextField = (EditText) findViewById(R.id.nameTextField);
         priceTextField = (EditText) findViewById(R.id.priceTextField);
@@ -104,7 +108,7 @@ public class FormActivity extends AppCompatActivity
 
         sendButton = (Button) findViewById(R.id.sendButton);
 
-        buildGoogleApiClient();
+//        buildGoogleApiClient();
     }
 
     /**
@@ -121,7 +125,7 @@ public class FormActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+//        mGoogleApiClient.connect();
     }
 
     @Override
@@ -141,24 +145,24 @@ public class FormActivity extends AppCompatActivity
         // applications that do not require a fine-grained location and that do not need location
         // updates. Gets the best and most recent location currently available, which may be null
         // in rare cases when a location is not available.
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-
-            String address = "http://localhost:3000/";
-            String locationString = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
-
-//            lat = mLastLocation.getLatitude();
-//            lng = mLastLocation.getLongitude();
-
-            Log.v(TAG, locationString);
-
-            mLatitudeText.setText(String.format("%s: %f", mLatitudeLabel,
-                    mLastLocation.getLatitude()));
-            mLongitudeText.setText(String.format("%s: %f", mLongitudeLabel,
-                    mLastLocation.getLongitude()));
-        } else {
-            Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
-        }
+//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        if (mLastLocation != null) {
+//
+//            String address = "http://localhost:3000/";
+//            String locationString = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
+//
+////            lat = mLastLocation.getLatitude();
+////            lng = mLastLocation.getLongitude();
+//
+//            Log.v(TAG, locationString);
+//
+////            mLatitudeText.setText(String.format("%s: %f", mLatitudeLabel,
+////                    mLastLocation.getLatitude()));
+////            mLongitudeText.setText(String.format("%s: %f", mLongitudeLabel,
+////                    mLastLocation.getLongitude()));
+//        } else {
+//            Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
+//        }
     }
 
     @Override

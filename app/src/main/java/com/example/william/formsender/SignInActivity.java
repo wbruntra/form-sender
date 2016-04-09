@@ -26,6 +26,7 @@ public class SignInActivity extends AppCompatActivity implements
 
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
+    private User mUser;
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
@@ -38,6 +39,8 @@ public class SignInActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        mUser = (User) getApplicationContext();
 
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
@@ -137,21 +140,16 @@ public class SignInActivity extends AppCompatActivity implements
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "Account Info:"+acct.getId());
-            userId = acct.getId();
+            mUser.setUserId(acct.getId());
+            mUser.setName(acct.getDisplayName());
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
-            userId = "none";
             updateUI(false);
         }
     }
 
-    private void backToMain(String userId) {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("userId",userId);
-        startActivity(intent);
-    }
     // [END handleSignInResult]
 
     // [START signIn]
@@ -167,7 +165,7 @@ public class SignInActivity extends AppCompatActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        userId = "none";
+                        mUser.setUserId("none");
                         // [START_EXCLUDE]
                         updateUI(false);
                         // [END_EXCLUDE]

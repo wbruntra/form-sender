@@ -39,6 +39,8 @@ public class MapsActivity extends FragmentActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     private GoogleMap mMap;
+    private User mUser;
+
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     public static final String TAG = MapsActivity.class.getSimpleName();
@@ -54,14 +56,7 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        Intent intent = getIntent();
-        if(intent.hasExtra("userId")) {
-            userId = intent.getStringExtra("userId");
-            Log.v(TAG, userId);
-        } else {
-            userId = "none";
-        }
-
+        mUser = (User) getApplicationContext();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -189,7 +184,7 @@ public class MapsActivity extends FragmentActivity implements
         Double lat = point.latitude;
         Double lng = point.longitude;
 
-        if (!Objects.equals(userId, "none")) {
+        if (!Objects.equals(mUser.getUserId(), "none")) {
             Intent intent = new Intent(this, FormActivity.class);
             intent.putExtra("clickedLat", lat);
             intent.putExtra("clickedLng", lng);
