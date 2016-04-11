@@ -3,12 +3,16 @@ package com.example.william.formsender;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -17,6 +21,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -36,10 +41,17 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapLongClickListener,
         OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnInfoWindowClickListener,
+        LocationListener{
 
     private GoogleMap mMap;
     private User mUser;
+    private boolean gotLocation;
+
+    private Double clickedLat;
+    private Double clickedLng;
+
+    private Marker lastMarker;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -51,12 +63,23 @@ public class MapsActivity extends FragmentActivity implements
     public String userId;
     public JSONArray recentLocations;
 
+    Button formOpenButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        gotLocation = false;
+        formOpenButton = (Button) findViewById(R.id.formOpenButton);
+
         mUser = (User) getApplicationContext();
+
+        Intent intent = getIntent();
+        if (intent.hasExtra("formResult")) {
+            String toastText = intent.getStringExtra("formResult");
+            Toast.makeText(this,toastText,Toast.LENGTH_SHORT).show();
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -65,7 +88,8 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void retrieveLocations() {
-        String whatsGoodURL = "http://localhost:3000/locations/json";
+        String whatsGoodURL = "http://pacific-castle-63467.herokuapp.com/locations/json";
+//        String whatsGoodURL = "http://localhost:3000/locations/json";
 
         OkHttpClient client = new OkHttpClient();
 
@@ -136,7 +160,7 @@ public class MapsActivity extends FragmentActivity implements
         retrieveLocations();
 
         LatLng cdmx = new LatLng(19.41, -99.16);
-        float zoomLevel = (float) 13.0;
+        float zoomLevel = (float) 15.0;
 //        mMap.addMarker(new MarkerOptions().position(cdmx).title("Marker in Mexico"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cdmx, zoomLevel));
 
@@ -173,26 +197,44 @@ public class MapsActivity extends FragmentActivity implements
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
-        float zoomLevel = (float) 15.0;
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(zoomLevel));
-        buttonClicked = true;
+        if (gotLocation) {
+            float zoomLevel = (float) 15.0;
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(zoomLevel));
+            buttonClicked = true;
+        }
         return false;
     }
 
     @Override
     public void onMapLongClick(LatLng point) {
-        Double lat = point.latitude;
-        Double lng = point.longitude;
+        clickedLat = point.latitude;
+        clickedLng = point.longitude;
 
         if (!Objects.equals(mUser.getUserId(), "none")) {
-            Intent intent = new Intent(this, FormActivity.class);
-            intent.putExtra("clickedLat", lat);
-            intent.putExtra("clickedLng", lng);
-            intent.putExtra("userId", userId);
-            startActivity(intent);
+            if (lastMarker != null) {
+                lastMarker.remove();
+                lastMarker = null;
+            }
+            lastMarker = mMap.addMarker(new MarkerOptions().position(point).title("Add Location"));
+            mMap.setOnInfoWindowClickListener(this);
+            formOpenButton.setVisibility(View.VISIBLE);
+            formOpenButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startFormActivity();
+                }
+            });
         } else {
             Log.v(TAG,"Click from anonymous user");
         }
+    }
+
+    public void startFormActivity() {
+        Intent intent = new Intent(this, FormActivity.class);
+        intent.putExtra("clickedLat", clickedLat);
+        intent.putExtra("clickedLng", clickedLng);
+        intent.putExtra("userId", mUser.getUserId());
+        startActivity(intent);
     }
 
     @Override
@@ -228,5 +270,30 @@ public class MapsActivity extends FragmentActivity implements
     private void showMissingPermissionError() {
         PermissionUtils.PermissionDeniedDialog
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.v(TAG, "Info window clicked");
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        gotLocation = true;
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }

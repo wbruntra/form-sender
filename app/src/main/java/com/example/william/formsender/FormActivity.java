@@ -1,32 +1,23 @@
 package com.example.william.formsender;
 
-import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,33 +27,19 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class FormActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class FormActivity extends AppCompatActivity {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     EditText nameTextField;
     EditText priceTextField;
+    EditText descriptionText;
     Spinner catSpinner;
     ImageView mapImageView;
 
+    private ProgressDialog mProgressDialog;
+
     Double lat;
     Double lng;
-
-    /**
-     * Provides the entry point to Google Play services.
-     */
-    protected GoogleApiClient mGoogleApiClient;
-
-    /**
-     * Represents a geographical location.
-     */
-    protected Location mLastLocation;
-
-
-//    protected String mLatitudeLabel;
-//    protected String mLongitudeLabel;
-//    protected TextView mLatitudeText;
-//    protected TextView mLongitudeText;
 
     Button sendButton;
     String userId;
@@ -89,13 +66,9 @@ public class FormActivity extends AppCompatActivity
 
         Log.v(TAG, "Clicked from "+lat+","+lng);
 
-//        mLatitudeLabel = getResources().getString(R.string.latitude_label);
-//        mLongitudeLabel = getResources().getString(R.string.longitude_label);
-//        mLatitudeText = (TextView) findViewById((R.id.latitude_text));
-//        mLongitudeText = (TextView) findViewById((R.id.longitude_text));
-
         nameTextField = (EditText) findViewById(R.id.nameTextField);
         priceTextField = (EditText) findViewById(R.id.priceTextField);
+        descriptionText = (EditText) findViewById(R.id.descriptionText);
         catSpinner = (Spinner) findViewById(R.id.catSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.category_array, android.R.layout.simple_spinner_item);
@@ -108,86 +81,37 @@ public class FormActivity extends AppCompatActivity
 
         sendButton = (Button) findViewById(R.id.sendButton);
 
-//        buildGoogleApiClient();
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProgressDialog();
+                send(v);
+            }
+        });
+
     }
 
-    /**
-     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
-     */
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.sending));
+            mProgressDialog.setIndeterminate(true);
         }
-    }
 
-    /**
-     * Runs when a GoogleApiClient object successfully connects.
-     */
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        // Provides a simple way of getting a device's location and is well suited for
-        // applications that do not require a fine-grained location and that do not need location
-        // updates. Gets the best and most recent location currently available, which may be null
-        // in rare cases when a location is not available.
-//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//        if (mLastLocation != null) {
-//
-//            String address = "http://localhost:3000/";
-//            String locationString = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
-//
-////            lat = mLastLocation.getLatitude();
-////            lng = mLastLocation.getLongitude();
-//
-//            Log.v(TAG, locationString);
-//
-////            mLatitudeText.setText(String.format("%s: %f", mLatitudeLabel,
-////                    mLastLocation.getLatitude()));
-////            mLongitudeText.setText(String.format("%s: %f", mLongitudeLabel,
-////                    mLastLocation.getLongitude()));
-//        } else {
-//            Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
-//        }
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
-        // onConnectionFailed.
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
-    }
-
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-        // The connection to Google Play services was lost for some reason. We call connect() to
-        // attempt to re-establish the connection.
-        Log.i(TAG, "Connection suspended");
-        mGoogleApiClient.connect();
+        mProgressDialog.show();
     }
 
     public void send(View v) {
         Log.v(TAG, "Send button clicked");
-        String sendURL = "http://localhost:3000/locations/android";
+        v.setEnabled(false);
+
+        String sendURL = "http://pacific-castle-63467.herokuapp.com/locations/android";
+//        String sendURL = "http://localhost:3000/locations/android";
 
         String name = nameTextField.getText().toString();
         String price = priceTextField.getText().toString();
         String cat = catSpinner.getSelectedItem().toString();
+        String desc = descriptionText.getText().toString();
 
         JSONObject jsonForm = new JSONObject();
 
@@ -195,6 +119,7 @@ public class FormActivity extends AppCompatActivity
             jsonForm.put("name", name);
             jsonForm.put("price", price);
             jsonForm.put("category", cat);
+            jsonForm.put("description",desc);
             jsonForm.put("lat",lat);
             jsonForm.put("lng",lng);
             jsonForm.put("creatorId",userId);
@@ -220,12 +145,27 @@ public class FormActivity extends AppCompatActivity
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    Log.v(TAG, response.body().string());
+                    String jsonRes = response.body().string();
+                    try {
+                        JSONObject res = new JSONObject(jsonRes);
+                        if (Objects.equals(res.getString("msg"), "OK")) {
+                            String result = "New Location Created";
+                            backToMap(result);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Log.i(TAG, "There was an error");
                 }
             }
         });
 
+    }
+
+    private void backToMap(String result) {
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("formResult",result);
+        startActivity(intent);
     }
 }
