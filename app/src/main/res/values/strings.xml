@@ -27,6 +27,7 @@
     <string name="form_title">Add New Location</string>
 
     <string name="signin_title_text">Google Sign-In\nQuickstart</string>
+    <string name="app_title_text">WhatsGood</string>
 
     <!-- Content Description for images -->
     <string name="desc_google_icon">Google Logo</string>
@@ -51,4 +52,5 @@
     <string name="auth_code_fmt">Auth Code: %s</string>
     <string name="id_token_fmt">ID Token: %s</string>
     <string name="sending">Sending…</string>
+    <string name="add_button_text">Add Location</string>
 </resources>

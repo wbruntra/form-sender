@@ -15,28 +15,21 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Open Map"
-            android:id="@+id/mapOpenButton"
-            android:layout_gravity="center_horizontal" />
-
         <ImageView
             android:id="@+id/google_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="@dimen/g_top_margin"
             android:contentDescription="@string/desc_google_icon"
-            android:src="@drawable/googleg_color" />
+            android:src="@drawable/tacos_de_guisado" />
 
         <TextView
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="@string/signin_title_text"
+            android:text="@string/app_title_text"
             android:gravity="center"
             android:textColor="@android:color/white"
             android:textSize="36sp" />
@@ -60,6 +53,14 @@
             android:scrollbars="vertical"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="See Map"
+            android:id="@+id/mapOpenButton"
+            android:layout_gravity="center_horizontal"
+            android:padding="12dp" />
 
     </LinearLayout>
 
