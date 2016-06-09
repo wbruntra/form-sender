@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Objects;
 
 import butterknife.Bind;
@@ -44,12 +45,16 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapLongClickListener,
         OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnInfoWindowClickListener,
-        LocationListener{
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        GoogleMap.OnInfoWindowClickListener,
+        LocationListener,
+        GoogleMap.OnMarkerClickListener{
 
     @Bind(R.id.nameTextView) TextView locationName;
     @Bind(R.id.priceTextView) TextView locationPrice;
     @Bind(R.id.descTextView) TextView locationDesc;
+
+    private HashMap<Marker, JSONObject> locationsHash;
 
     private GoogleMap mMap;
     private User mUser;
@@ -133,8 +138,9 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void populateMap(JSONArray entries) throws JSONException {
+        locationsHash = new HashMap<Marker, JSONObject>();
         for(int n=0;n< entries.length(); n++) {
-            JSONObject entry = entries.getJSONObject(n);
+            final JSONObject entry = entries.getJSONObject(n);
             Double lat = entry.getDouble("lat");
             Double lng = entry.getDouble("lng");
             final String placeName = entry.getString("name");
@@ -142,7 +148,8 @@ public class MapsActivity extends FragmentActivity implements
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mMap.addMarker(new MarkerOptions().position(placeGPS).title(placeName));
+                    Marker newMarker = mMap.addMarker(new MarkerOptions().position(placeGPS).title(placeName));
+                    locationsHash.put(newMarker, entry);
                 }
             });
         }
@@ -182,6 +189,28 @@ public class MapsActivity extends FragmentActivity implements
                     mMap.moveCamera(CameraUpdateFactory.zoomTo(zoomLevel));
                     buttonClicked = false;
                 }
+            }
+        });
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                Log.v(TAG, "Marker clicked!");
+                JSONObject entry = locationsHash.get(marker);
+                String name = "(none)";
+                String price = "(no info)";
+                String desc = "(none)";
+                try {
+                    name = entry.getString("name");
+                    price = entry.getString("price");
+                    desc = entry.getString("description");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                locationName.setText(name);
+                locationPrice.setText(price);
+                locationDesc.setText(desc);
+                return false;
             }
         });
     }
@@ -304,5 +333,25 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Log.v(TAG, "Marker clicked!");
+        JSONObject entry = locationsHash.get(marker);
+        String name = "(none)";
+        String price = "(no info)";
+        String desc = "(none)";
+        try {
+            name = entry.getString("name");
+            price = entry.getString("price");
+            desc = entry.getString("description");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        locationName.setText(name);
+        locationPrice.setText(price);
+        locationDesc.setText(desc);
+        return false;
     }
 }
